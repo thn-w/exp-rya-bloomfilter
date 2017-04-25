@@ -1,0 +1,8 @@
+createtable wbf_1b_ns
+createtable wbf_1b_spo
+config -t wbf_1b_spo -s table.bloom.enabled=true
+createtable wbf_1b_po
+config -t wbf_1b_po -s table.bloom.enabled=true
+createtable wbf_1b_osp
+config -t wbf_1b_osp -s table.bloom.enabled=true
+exit

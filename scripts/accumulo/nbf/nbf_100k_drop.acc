@@ -1,0 +1,2 @@
+droptable -f nbf_100k_ns nbf_100k_spo nbf_100k_po nbf_100k_osp
+exit

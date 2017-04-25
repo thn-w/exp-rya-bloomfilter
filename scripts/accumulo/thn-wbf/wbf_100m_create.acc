@@ -1,0 +1,8 @@
+createtable thn_wbf_100m_ns
+createtable thn_wbf_100m_spo
+config -t thn_wbf_100m_spo -s table.bloom.enabled=true
+createtable thn_wbf_100m_po
+config -t thn_wbf_100m_po -s table.bloom.enabled=true
+createtable thn_wbf_100m_osp
+config -t thn_wbf_100m_osp -s table.bloom.enabled=true
+exit

@@ -1,0 +1,7 @@
+compact -w -t thn_nbf_1k_spo
+compact -w -t thn_nbf_100k_spo
+compact -w -t thn_nbf_1m_spo
+compact -w -t thn_nbf_10m_spo
+compact -w -t thn_nbf_100m_spo
+compact -w -t thn_nbf_1b_spo
+exit

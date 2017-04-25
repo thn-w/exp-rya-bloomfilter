@@ -1,0 +1,5 @@
+createtable thn_nbf_100m_ns
+createtable thn_nbf_100m_spo
+createtable thn_nbf_100m_po
+createtable thn_nbf_100m_osp
+exit

@@ -1,0 +1,5 @@
+createtable nbf_ns
+createtable nbf_spo
+createtable nbf_po
+createtable nbf_osp
+exit
