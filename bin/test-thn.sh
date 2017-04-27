@@ -1,47 +1,75 @@
 #!/bin/bash
 
-#JAR_FILE=rya-bloomfilter-0.0.1-SNAPSHOT-shaded.jar
-JAR_FILE=rya-bloomfilter-exp-0.0.1-SNAPSHOT-shaded.jar
+# application jar file
+JAR_FILE=exp-rya-bloomfilter-0.0.1-SNAPSHOT-shaded.jar
 
+# accumulo info <instance name>:<user name>:<password>
 ACCUMULO_INFO="spear_instance:SPEAR:spear"
+
+# zookeepers <host>:<port>
 ZK_INFO="zoo1.cluster.sparta.com:2181,zoo2.cluster.sparta.com:2181,zoo3.cluster.sparta.com:2181,zoo4.cluster.sparta.com:2181,zoo5.cluster.sparta.com:2181"
 
+# random <seed>:<start>:<end>:<prefix>
 RANDOM_INFO="8:0:1000000000:test"
 RANDOM_INFO2="10:0:1000000000:test2"
 
+# table prefiex
+NBF_PREFIX=thn_nbf
+WBF_PREFIX=thn_wbf
+
+# tables with no bloome filter enabled
+NBF_1K="$NBF_PREFIX"_1k_
+NBF_100K="$NBF_PREFIX"_100k_
+
+NBF_1M="$NBF_PREFIX"_1m_
+NBF_10M="$NBF_PREFIX"_10m_
+NBF_100M="$NBF_PREFIX"_100m_
+
+NBF_1B="$NBF_PREFIX"_1b_
+
+# tables with bloom filter enabled
+WBF_1K="$WBF_PREFIX"_1k_
+WBF_100K="$WBF_PREFIX"_100k_
+
+WBF_1M="$WBF_PREFIX"_1m_
+WBF_10M="$WBF_PREFIX"_10m_
+WBF_100M="$WBF_PREFIX"_100m_
+
+WBF_1B="$WBF_PREFIX"_1b_
+
 case "$1" in
-  'load.random')
-    java -jar $JAR_FILE load.random $ACCUMULO_INFO $ZK_INFO $2 $RANDOM_INFO $3
+  'rya.load.random')
+    java -jar $JAR_FILE rya load.random $ACCUMULO_INFO $ZK_INFO $2 $RANDOM_INFO $3
     ;;
 
   'load.random.nbf.k')
-    $0 load.random thn_nbf_1k_ 1000
-    $0 load.random thn_nbf_100k_ 100000
+    $0 rya.load.random $NBF_1K 1000
+    $0 rya.load.random $NBF_100K 100000
     ;;
 
   'load.random.nbf.m')
-    $0 load.random thn_nbf_1m_ 1000000
-    $0 load.random thn_nbf_10m_ 10000000
-    $0 load.random thn_nbf_100m_ 100000000
+    $0 rya.load.random $NBF_1M 1000000
+    $0 rya.load.random $NBF_10M 10000000
+    $0 rya.load.random $NBF_100M 100000000
     ;;
 
   'load.random.nbf.b')
-    $0 load.random thn_nbf_1b_ 1000000000
+    $0 rya.load.random $NBF_1B 1000000000
     ;;
 
   'load.random.wbf.k')
-    $0 load.random thn_wbf_1k_ 1000
-    $0 load.random thn_wbf_100k_ 100000
+    $0 rya.load.random $WBF_1K 1000
+    $0 rya.load.random $WBF_100K 100000
     ;;
 
   'load.random.wbf.m')
-    $0 load.random thn_wbf_1m_ 1000000
-    $0 load.random thn_wbf_10m_ 10000000
-    $0 load.random thn_wbf_100m_ 100000000
+    $0 rya.load.random $WBF_1M 1000000
+    $0 rya.load.random $WBF_10M 10000000
+    $0 rya.load.random $WBF_100M 100000000
     ;;
 
   'load.random.wbf.b')
-    $0 load.random thn_wbf_1b_ 1000000000
+    $0 rya.load.random $WBF_1B 1000000000
     ;;
 
   'load.random.m')
@@ -55,191 +83,293 @@ case "$1" in
     ;;
 
   'query.random')
-    java -jar $JAR_FILE query.random $ACCUMULO_INFO $ZK_INFO $2 $RANDOM_INFO $3
+    java -jar $JAR_FILE $2 query.random $ACCUMULO_INFO $ZK_INFO $3 $RANDOM_INFO $4
     ;;
 
-  'query.random.2')
-    java -jar $JAR_FILE query.random $ACCUMULO_INFO $ZK_INFO $2 $RANDOM_INFO2 $3
+  'query.random.nh')
+    java -jar $JAR_FILE $2 query.random $ACCUMULO_INFO $ZK_INFO $3 $RANDOM_INFO2 $4
     ;;
 
   'query.random.values')
-    java -jar $JAR_FILE query.random.values $ACCUMULO_INFO $ZK_INFO $2 $RANDOM_INFO $3 $4
+    # <query type> <table prefix> <number of values> <number of iterations>
+    java -jar $JAR_FILE $2 query.random.values $ACCUMULO_INFO $ZK_INFO $3 $RANDOM_INFO $4 $5
     ;;
 
-  'query.random.values.2')
-    java -jar $JAR_FILE query.random.values $ACCUMULO_INFO $ZK_INFO $2 $RANDOM_INFO2 $3 $4
+  'rya.query.random.values')
+    # <table prefix> <number of values> <number of iterations>
+    $0 query.random.values rya $2 $3 $4
+    ;;
+
+  'accumulo.query.random.values')
+    # <table prefix> <number of values> <number of iterations>
+    $0 query.random.values accumulo $2 $3 $4
+    ;;
+
+  # no hit case
+  'query.random.values.nh')
+    java -jar $JAR_FILE $2 query.random.values $ACCUMULO_INFO $ZK_INFO $3 $RANDOM_INFO2 $4 $5
+    ;;
+
+  'rya.query.random.values.nh')
+    # <table prefix> <number of values> <number of iterations>
+    $0 query.random.values.nh rya $2 $3 $4
+    ;;
+
+  'accumulo.query.random.values.nh')
+    # <table prefix> <number of values> <number of iterations>
+    $0 query.random.values.nh accumulo $2 $3 $4
     ;;
 
   'query.random.values.ratio')
-    java -jar $JAR_FILE query.random.values.ratio $ACCUMULO_INFO $ZK_INFO $2 $RANDOM_INFO $RANDOM_INFO2 $3 $4
+    java -jar $JAR_FILE $2 query.random.values.ratio $ACCUMULO_INFO $ZK_INFO $3 $RANDOM_INFO $RANDOM_INFO2 $4 $5
     ;;
 
-  'query.random.values.direct')
-    java -jar $JAR_FILE query.random.values.direct $ACCUMULO_INFO $ZK_INFO $2 $RANDOM_INFO $3 $4
+  'rya.query.random.values.ratio')
+    # <table prefix> <ratio> <number of iterations>
+    $0 query.random.values.ratio rya $2 $3 $4
     ;;
 
-  'query.random.values.direct.2')
-    java -jar $JAR_FILE query.random.values.direct $ACCUMULO_INFO $ZK_INFO $2 $RANDOM_INFO2 $3 $4
+  'accumulo.query.random.values.ratio')
+    # <table prefix> <ratio> <number of iterations>
+    $0 query.random.values.ratio accumulo $2 $3 $4
     ;;
 
   'query.random.nbf')
-    $0 query.random thn_nbf_1k_   10
-    $0 query.random thn_nbf_100k_ 10
-    $0 query.random thn_nbf_1m_   10
-    $0 query.random thn_nbf_10m_  10
-    $0 query.random thn_nbf_100m_ 10
+    $0 query.random $NBF_1K   10
+    $0 query.random $NBF_100K 10
+    $0 query.random $NBF_1M   10
+    $0 query.random $NBF_10M  10
+    $0 query.random $NBF_100M 10
     ;;
 
   'query.random.wbf')
-    $0 query.random thn_wbf_1k_   10
-    $0 query.random thn_wbf_100k_ 10
-    $0 query.random thn_wbf_1m_   10
-    $0 query.random thn_wbf_10m_  10
-    $0 query.random thn_wbf_100m_ 10
+    $0 query.random $WBF_1K   10
+    $0 query.random $WBF_100K 10
+    $0 query.random $WBF_1M   10
+    $0 query.random $WBF_10M  10
+    $0 query.random $WBF_100M 10
     ;;
 
   'query.random.2.nbf')
-    $0 query.random.2 thn_nbf_1k_   10
-    $0 query.random.2 thn_nbf_100k_ 10
-    $0 query.random.2 thn_nbf_1m_   10
-    $0 query.random.2 thn_nbf_10m_  10
-    $0 query.random.2 thn_nbf_100m_ 10
+    $0 query.random.2 $NBF_1K   10
+    $0 query.random.2 $NBF_100K 10
+    $0 query.random.2 $NBF_1M   10
+    $0 query.random.2 $NBF_10M  10
+    $0 query.random.2 $NBF_100M 10
     ;;
 
   'query.random.2.wbf')
-    $0 query.random.2 thn_wbf_1k_   10
-    $0 query.random.2 thn_wbf_100k_ 10
-    $0 query.random.2 thn_wbf_1m_   10
-    $0 query.random.2 thn_wbf_10m_  10
-    $0 query.random.2 thn_wbf_100m_ 10
+    $0 query.random.2 $WBF_1K   10
+    $0 query.random.2 $WBF_100K 10
+    $0 query.random.2 $WBF_1M   10
+    $0 query.random.2 $WBF_10M  10
+    $0 query.random.2 $WBF_100M 10
     ;;
 
-  'query.random.values.general')
-    $0 query.random.values $2 1 3
-    $0 query.random.values $2 10 3
-    $0 query.random.values $2 100 3
-    $0 query.random.values $2 1000 3
+  # via Rya
+  'rya.query.random.values.general')
+    $0 rya.query.random.values $2 1 5
+    $0 rya.query.random.values $2 10 5
+    $0 rya.query.random.values $2 100 5
+    $0 rya.query.random.values $2 1000 5
     ;;
 
-  'query.random.values.nbf')
-    $0 query.random.values.general thn_nbf_1k_
-    $0 query.random.values.general thn_nbf_100k_
-    $0 query.random.values.general thn_nbf_1m_
-    $0 query.random.values.general thn_nbf_10m_
-    $0 query.random.values.general thn_nbf_100m_
+  'rya.query.random.values.nbf')
+    $0 rya.query.random.values.general $NBF_1K
+    $0 rya.query.random.values.general $NBF_100K
+    $0 rya.query.random.values.general $NBF_1M
+    $0 rya.query.random.values.general $NBF_10M
+    $0 rya.query.random.values.general $NBF_100M
+    $0 rya.query.random.values.general $NBF_1B
     ;;
 
-  'query.random.values.wbf')
-    $0 query.random.values.general thn_wbf_1k_
-    $0 query.random.values.general thn_wbf_100k_
-    $0 query.random.values.general thn_wbf_1m_
-    $0 query.random.values.general thn_wbf_10m_
-    $0 query.random.values.general thn_wbf_100m_
+  'rya.query.random.values.wbf')
+    $0 rya.query.random.values.general $WBF_1K
+    $0 rya.query.random.values.general $WBF_100K
+    $0 rya.query.random.values.general $WBF_1M
+    $0 rya.query.random.values.general $WBF_10M
+    $0 rya.query.random.values.general $WBF_100M
+    $0 rya.query.random.values.general $WBF_1B
     ;;
 
-  'query.random.values.direct.general')
-    $0 query.random.values.direct $2 1 3
-    $0 query.random.values.direct $2 10 3
-    $0 query.random.values.direct $2 100 3
-    $0 query.random.values.direct $2 1000 3
+  # via accumulo
+  'accumulo.query.random.values.general')
+    $0 accumulo.query.random.values $2 1 5
+    $0 accumulo.query.random.values $2 10 5
+    $0 accumulo.query.random.values $2 100 5
+    $0 accumulo.query.random.values $2 1000 5
     ;;
 
-  'query.random.values.2.general')
-    $0 query.random.values.2 $2 1 3
-    $0 query.random.values.2 $2 10 3
-    $0 query.random.values.2 $2 100 3
-    $0 query.random.values.2 $2 1000 3
+  'accumulo.query.random.values.nbf')
+    $0 accumulo.query.random.values.general $NBF_1K
+    $0 accumulo.query.random.values.general $NBF_100K
+    $0 accumulo.query.random.values.general $NBF_1M
+    $0 accumulo.query.random.values.general $NBF_10M
+    $0 accumulo.query.random.values.general $NBF_100M
+    $0 accumulo.query.random.values.general $NBF_1B
     ;;
 
-  'query.random.values.2.nbf')
-    $0 query.random.values.2.general thn_nbf_1k_
-    $0 query.random.values.2.general thn_nbf_100k_
-    $0 query.random.values.2.general thn_nbf_1m_
-    $0 query.random.values.2.general thn_nbf_10m_
-    $0 query.random.values.2.general thn_nbf_100m_
+  'accumulo.query.random.values.wbf')
+    $0 accumulo.query.random.values.general $WBF_1K
+    $0 accumulo.query.random.values.general $WBF_100K
+    $0 accumulo.query.random.values.general $WBF_1M
+    $0 accumulo.query.random.values.general $WBF_10M
+    $0 accumulo.query.random.values.general $WBF_100M
+    $0 accumulo.query.random.values.general $WBF_1B
     ;;
 
-  'query.random.values.2.wbf')
-    $0 query.random.values.2.general thn_wbf_1k_
-    $0 query.random.values.2.general thn_wbf_100k_
-    $0 query.random.values.2.general thn_wbf_1m_
-    $0 query.random.values.2.general thn_wbf_10m_
-    $0 query.random.values.2.general thn_wbf_100m_
+  # via rya
+  'rya.query.random.values.nh.general')
+    $0 rya.query.random.values.nh $2 1 5
+    $0 rya.query.random.values.nh $2 10 5
+    $0 rya.query.random.values.nh $2 100 5
+    $0 rya.query.random.values.nh $2 1000 5
     ;;
 
-  'query.random.values.ratio.general')
-    $0 query.random.values.ratio $2 99:1  3
-    $0 query.random.values.ratio $2 25:75 3
-    $0 query.random.values.ratio $2 50:50 3
-    $0 query.random.values.ratio $2 75:25 3
-    $0 query.random.values.ratio $2 1:99  3
-
-    $0 query.random.values.ratio $2 999:1   3
-    $0 query.random.values.ratio $2 250:750 3
-    $0 query.random.values.ratio $2 500:500 3
-    $0 query.random.values.ratio $2 750:250 3
-    $0 query.random.values.ratio $2 1:999   3
+  'rya.query.random.values.nh.nbf')
+    $0 rya.query.random.values.nh.general $NBF_1K
+    $0 rya.query.random.values.nh.general $NBF_100K
+    $0 rya.query.random.values.nh.general $NBF_1M
+    $0 rya.query.random.values.nh.general $NBF_10M
+    $0 rya.query.random.values.nh.general $NBF_100M
+    $0 rya.query.random.values.nh.general $NBF_1B
     ;;
 
-  'query.random.values.ratio.nbf')
-    $0 query.random.values.ratio.general thn_nbf_1k_
-    $0 query.random.values.ratio.general thn_nbf_100k_
-    $0 query.random.values.ratio.general thn_nbf_1m_
-    $0 query.random.values.ratio.general thn_nbf_10m_
-    $0 query.random.values.ratio.general thn_nbf_100m_
+  'rya.query.random.values.nh.wbf')
+    $0 rya.query.random.values.nh.general $WBF_1K
+    $0 rya.query.random.values.nh.general $WBF_100K
+    $0 rya.query.random.values.nh.general $WBF_1M
+    $0 rya.query.random.values.nh.general $WBF_10M
+    $0 rya.query.random.values.nh.general $WBF_100M
+    $0 rya.query.random.values.nh.general $WBF_1B
+    ;;
+    
+  # via accumulo
+  'accumulo.query.random.values.nh.general')
+    $0 accumulo.query.random.values.nh $2 1 5
+    $0 accumulo.query.random.values.nh $2 10 5
+    $0 accumulo.query.random.values.nh $2 100 5
+    $0 accumulo.query.random.values.nh $2 1000 5
     ;;
 
-  'query.random.values.ratio.wbf')
-    $0 query.random.values.ratio.general thn_wbf_1k_
-    $0 query.random.values.ratio.general thn_wbf_100k_
-    $0 query.random.values.ratio.general thn_wbf_1m_
-    $0 query.random.values.ratio.general thn_wbf_10m_
-    $0 query.random.values.ratio.general thn_wbf_100m_
+  'accumulo.query.random.values.nh.nbf')
+    $0 accumulo.query.random.values.nh.general $NBF_1K
+    $0 accumulo.query.random.values.nh.general $NBF_100K
+    $0 accumulo.query.random.values.nh.general $NBF_1M
+    $0 accumulo.query.random.values.nh.general $NBF_10M
+    $0 accumulo.query.random.values.nh.general $NBF_100M
+    $0 accumulo.query.random.values.nh.general $NBF_1B
     ;;
 
-  'run.nbf')
-    $0 query.random.nbf
-    $0 query.random.2.nbf
-    $0 query.random.values.nbf
-    $0 query.random.values.2.nbf
-    $0 query.random.values.ratio.nbf
-    $0 run.nbf.b
+  'accumulo.query.random.values.nh.wbf')
+    $0 accumulo.query.random.values.nh.general $WBF_1K
+    $0 accumulo.query.random.values.nh.general $WBF_100K
+    $0 accumulo.query.random.values.nh.general $WBF_1M
+    $0 accumulo.query.random.values.nh.general $WBF_10M
+    $0 accumulo.query.random.values.nh.general $WBF_100M
+    $0 accumulo.query.random.values.nh.general $WBF_1B
     ;;
 
-  'run.nbf.b')
-    $0 query.random thn_nbf_1b_ 10
-    $0 query.random.2 thn_nbf_1b_ 10
-    $0 query.random.values.general thn_nbf_1b_
-    $0 query.random.values.2.general thn_nbf_1b_
-    $0 query.random.values.ratio.general thn_nbf_1b_
+  # via rya
+  'rya.query.random.values.ratio.general')
+    $0 rya.query.random.values.ratio $2 100:0  5
+    $0 rya.query.random.values.ratio $2 99:1   5
+    $0 rya.query.random.values.ratio $2 25:75  5
+    $0 rya.query.random.values.ratio $2 50:50  5
+    $0 rya.query.random.values.ratio $2 75:25  5
+    $0 rya.query.random.values.ratio $2 1:99   5
+    $0 rya.query.random.values.ratio $2 0:100  5
+
+    $0 rya.query.random.values.ratio $2 1000:0  5
+    $0 rya.query.random.values.ratio $2 999:1   5
+    $0 rya.query.random.values.ratio $2 250:750 5
+    $0 rya.query.random.values.ratio $2 500:500 5
+    $0 rya.query.random.values.ratio $2 750:250 5
+    $0 rya.query.random.values.ratio $2 1:999   5
+    $0 rya.query.random.values.ratio $2 0:1000  5
     ;;
 
-  'run.wbf')
-    $0 query.random.wbf
-    $0 query.random.2.wbf
-    $0 query.random.values.wbf
-    $0 query.random.values.2.wbf
-    $0 query.random.values.ratio.wbf
-    $0 run.wbf.b
+  'rya.query.random.values.ratio.nbf')
+    $0 rya.query.random.values.ratio.general $NBF_1K
+    $0 rya.query.random.values.ratio.general $NBF_100K
+    $0 rya.query.random.values.ratio.general $NBF_1M
+    $0 rya.query.random.values.ratio.general $NBF_10M
+    $0 rya.query.random.values.ratio.general $NBF_100M
+    $0 rya.query.random.values.ratio.general $NBF_1B
     ;;
 
-  'run.wbf.b')
-    $0 query.random thn_wbf_1b_ 10
-    $0 query.random.2 thn_wbf_1b_ 10
-    $0 query.random.values.general thn_wbf_1b_
-    $0 query.random.values.2.general thn_wbf_1b_
-    $0 query.random.values.ratio.general thn_wbf_1b_
+  'rya.query.random.values.ratio.wbf')
+    $0 rya.query.random.values.ratio.general $WBF_1K
+    $0 rya.query.random.values.ratio.general $WBF_100K
+    $0 rya.query.random.values.ratio.general $WBF_1M
+    $0 rya.query.random.values.ratio.general $WBF_10M
+    $0 rya.query.random.values.ratio.general $WBF_100M
+    $0 rya.query.random.values.ratio.general $WBF_1B
     ;;
 
-  'run.direct.nbf.b')
-    $0 query.random.values.direct thn_nbf_1b_ 1000 3
-    $0 query.random.values.direct.2 thn_nbf_1b_ 1000 3
+  # via accumulo
+  'accumulo.query.random.values.ratio.general')
+    $0 accumulo.query.random.values.ratio $2 100:0  5
+    $0 accumulo.query.random.values.ratio $2 99:1   5
+    $0 accumulo.query.random.values.ratio $2 25:75  5
+    $0 accumulo.query.random.values.ratio $2 50:50  5
+    $0 accumulo.query.random.values.ratio $2 75:25  5
+    $0 accumulo.query.random.values.ratio $2 1:99   5
+    $0 accumulo.query.random.values.ratio $2 0:100  5
+
+    $0 accumulo.query.random.values.ratio $2 1000:0  5
+    $0 accumulo.query.random.values.ratio $2 999:1   5
+    $0 accumulo.query.random.values.ratio $2 250:750 5
+    $0 accumulo.query.random.values.ratio $2 500:500 5
+    $0 accumulo.query.random.values.ratio $2 750:250 5
+    $0 accumulo.query.random.values.ratio $2 1:999   5
+    $0 accumulo.query.random.values.ratio $2 0:1000  5
     ;;
 
-  'run.direct.wbf.b')
-    $0 query.random.values.direct thn_wbf_1b_ 1000 3
-    $0 query.random.values.direct.2 thn_wbf_1b_ 1000 3
+  'accumulo.query.random.values.ratio.nbf')
+    $0 accumulo.query.random.values.ratio.general $NBF_1K
+    $0 accumulo.query.random.values.ratio.general $NBF_100K
+    $0 accumulo.query.random.values.ratio.general $NBF_1M
+    $0 accumulo.query.random.values.ratio.general $NBF_10M
+    $0 accumulo.query.random.values.ratio.general $NBF_100M
+    $0 accumulo.query.random.values.ratio.general $NBF_1B
     ;;
+
+  'accumulo.query.random.values.ratio.wbf')
+    $0 accumulo.query.random.values.ratio.general $WBF_1K
+    $0 accumulo.query.random.values.ratio.general $WBF_100K
+    $0 accumulo.query.random.values.ratio.general $WBF_1M
+    $0 accumulo.query.random.values.ratio.general $WBF_10M
+    $0 accumulo.query.random.values.ratio.general $WBF_100M
+    $0 accumulo.query.random.values.ratio.general $WBF_1B
+    ;;
+
+  # nbf (no bloom filter) 
+  'run.nbf.rya')
+    $0 rya.query.random.values.nbf
+    $0 rya.query.random.values.nh.nbf
+    $0 rya.query.random.values.ratio.nbf
+    ;;
+    
+ 'run.nbf.accumulo')
+    $0 accumulo.query.random.values.nbf
+    $0 accumulo.query.random.values.nh.nbf
+    $0 accumulo.query.random.values.ratio.nbf
+    ;;
+
+  # wbf (with bloom filter)
+  'run.wbf.rya')
+    $0 rya.query.random.values.wbf
+    $0 rya.query.random.values.nh.wbf
+    $0 rya.query.random.values.ratio.wbf
+    ;;
+
+  'run.wbf.accumulo')
+    $0 accumulo.query.random.values.wbf
+    $0 accumulo.query.random.values.nh.wbf
+    $0 accumulo.query.random.values.ratio.wbf
+    ;;
+
   *)
     java -jar $JAR_FILE
     ;;
